@@ -1,111 +1,68 @@
 #include <iostream>
 #include <fstream>
-#include <map>
+#include <algorithm>
+#include <string.h>
 
 using namespace std;
 
 ifstream fin("date.in");
 ofstream fout("date.out");
 
-const int WIN = 6;
-const int DRAW = 3;
-const int LOSS = 0;
+const int ELVES_MAX = 1e4;
+const int MAX_CALORIE_LENGTH = 10;
 
-const int FOR_A = 1;
-const int FOR_B = 2;
-const int FOR_C = 3;
+int no_elves;
+int elve_calories[ELVES_MAX];
+int maximum_no_calories;
 
-long long total_score;
-bool freq[256];
-map<char, char> right_moves;
+int convert_chara_to_int(char calories[]) {
 
-void read(char& their_move, char& my_move) {
+	int no_calories = 0;
 
-    char line[4];
+	for (size_t i = 0; i < strlen(calories); i++)
+		no_calories = no_calories * 10 + (calories[i] - '0');
 
-    fin.getline(line, 4);
-
-    their_move = line[0];
-    my_move = line[2];
+	return no_calories;
 }
 
-char get_right_move(char their_move, char my_move) {
+void read() {
 
-    if (their_move == 'A')
-        if (my_move == 'X')
-            return 'C';
-        else if (my_move == 'Y')
-            return 'A';
-        else
-            return 'B';
-    
-    else if (their_move == 'B')
-        if (my_move == 'X')
-            return 'A';
-        else if (my_move == 'Y')
-            return 'B';
-        else
-            return 'C';
+	char calories[MAX_CALORIE_LENGTH];
 
-    if (my_move == 'X')
-        return 'B';
-    else if (my_move == 'Y')
-        return 'C';
-    else
-        return 'A';
-}
+	while (fin.eof() == false) {
 
-int calculate_score(char their_move, char my_move) {
+		no_elves++;
 
-    if (their_move == 'A') // rock
-        if (my_move == 'A')
-            return FOR_A + DRAW;
-        else if (my_move == 'B')
-            return FOR_B + WIN;
-        else
-            return FOR_C + LOSS;
+		do {
 
-    else if (their_move == 'B') // paper
-        if (my_move == 'A')
-            return FOR_A + LOSS;
-        else if (my_move == 'B')
-            return FOR_B + DRAW;
-        else
-            return FOR_C + WIN;
-    
-    // if their_move is scissors (C)
-    if (my_move == 'A')
-        return FOR_A + WIN;
-    else if (my_move == 'B')
-        return FOR_B + LOSS;
-    else
-        return FOR_C + DRAW;
+			fin.getline(calories, MAX_CALORIE_LENGTH);
+
+			elve_calories[no_elves] += convert_chara_to_int(calories);
+
+		} while (strcmp(calories, ""));
+	}
 }
 
 void solve() {
 
-    char their_move, my_move;
-
-    while (fin.eof() == false) {
-
-        read(their_move, my_move);
-        
-        total_score += calculate_score(their_move, get_right_move(their_move, my_move));
-    }
+	sort(elve_calories + 1, elve_calories + no_elves + 1);
 }
 
 void display() {
-    
-    fout << total_score;
+
+	fout << elve_calories[no_elves] +
+		elve_calories[no_elves - 1] +
+		elve_calories[no_elves - 2];
 }
 
 int main() {
 
-    solve();
-    display();
+	read();
+	solve();
+	display();
 
-    fin.close();
-    fout.close();
+	fin.close();
+	fout.close();
 
-    return 0;
+	return 0;
 }
