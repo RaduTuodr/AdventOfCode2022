@@ -1,68 +1,90 @@
 #include <iostream>
 #include <fstream>
-#include <algorithm>
-#include <string.h>
+#include <vector>
 
 using namespace std;
 
 ifstream fin("date.in");
 ofstream fout("date.out");
 
-const int ELVES_MAX = 1e4;
-const int MAX_CALORIE_LENGTH = 10;
+const int _MAX = 3e2 + 1;
+const int ALPH_SIZE = 26;
+const int ASCII_SIZE = 256;
 
-int no_elves;
-int elve_calories[ELVES_MAX];
-int maximum_no_calories;
+int no_rucksacks;
+string rucksack_items[_MAX];
 
-int convert_chara_to_int(char calories[]) {
+bool container1_freq[ASCII_SIZE];
+bool container2_freq[ASCII_SIZE];
 
-	int no_calories = 0;
-
-	for (size_t i = 0; i < strlen(calories); i++)
-		no_calories = no_calories * 10 + (calories[i] - '0');
-
-	return no_calories;
-}
+int total_priority;
 
 void read() {
+    
+    while (fin.eof() == false)
+        fin >> rucksack_items[++no_rucksacks];
+}
 
-	char calories[MAX_CALORIE_LENGTH];
+void init(bool arr[]) {
 
-	while (fin.eof() == false) {
+    for (int i = 'A'; i <= 'z'; i++)
+        arr[i] = false;
+}
 
-		no_elves++;
+void set_freq(string str, bool arr[], int left, int right) {
 
-		do {
+    for (int i = left; i < right; i++)
+        arr[int(str[i])] = true;
+}
 
-			fin.getline(calories, MAX_CALORIE_LENGTH);
+char check_for_both() {
 
-			elve_calories[no_elves] += convert_chara_to_int(calories);
+    for (int i = 'A'; i <= 'z'; i++)
+        if (container1_freq[i] && container2_freq[i])
+            return i;
 
-		} while (strcmp(calories, ""));
-	}
+    return '0';
+}
+
+int convert_char_to_priority(char id_char) {
+
+    if ('a' <= id_char && id_char <= 'z')
+        return (int)id_char - 'a' + 1;
+    return (int)id_char - 'A' + ALPH_SIZE + 1;
 }
 
 void solve() {
 
-	sort(elve_calories + 1, elve_calories + no_elves + 1);
+    for (int i = 1; i <= no_rucksacks; i++) {
+
+        string item = rucksack_items[i];
+        size_t length = item.size();
+
+        init(container1_freq);
+        init(container2_freq);
+
+        set_freq(item, container1_freq, 0, length / 2);
+        set_freq(item, container2_freq, length / 2, length);
+
+        char id_char = check_for_both();
+
+        total_priority += convert_char_to_priority(id_char);
+    }
 }
 
 void display() {
-
-	fout << elve_calories[no_elves] +
-		elve_calories[no_elves - 1] +
-		elve_calories[no_elves - 2];
+    
+    fout << total_priority;
 }
 
 int main() {
 
-	read();
-	solve();
-	display();
+    read();
+    solve();
+    display();
 
-	fin.close();
-	fout.close();
+    fin.close();
+    fout.close();
 
-	return 0;
+    return 0;
 }
